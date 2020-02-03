@@ -1,0 +1,17 @@
+version: '3.5'
+services:
+  pwsh_env_script:
+    image: nickadam/pwsh_env_script:1.0
+    build: .
+    environment:
+      TZ: America/New_York
+      SCRIPT: |
+        $$TZ = (Get-ChildItem Env:TZ).Value
+        $$SystemTimeZone = ([System.TimeZoneInfo]::GetSystemTimeZones() | where {$$_.id -eq $$TZ})[0]
+        function Get-LocalDateTime(){
+          Get-Date ([TimeZoneInfo]::ConvertTime([DateTime]::Now, $$SystemTimeZone)) -UFormat "%Y-%m-%d %H:%M:%S"
+        }
+        While($$True){
+          "The current date and time is " + (Get-LocalDateTime) + " " + $$TZ
+          Start-Sleep 1
+        }
